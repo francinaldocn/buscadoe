@@ -6,3 +6,4 @@ python-dotenv==0.20.0
 requests==2.25.1
 telepot==12.7
 urllib3==1.26.5
+bs4==0.0.1

@@ -15,16 +15,11 @@ from send_telegram_msg import send_message
 
 
 # Set locale to pt_BR
-locale.setlocale(locale.LC_TIME, "pt_BR.utf8")
+# locale.setlocale(locale.LC_TIME, "pt_BR.utf8")
 
 # Date variables
 current_date = datetime.now()
 current_date_text = current_date.strftime("%d-%m-%Y")
-current_month_text = current_date.strftime("%B")
-current_year_text = current_date.strftime("%Y")
-current_day = current_date.weekday()
-current_day_text = current_date.strftime("%A")
-
 
 # Root folder
 root_folder = Path(__file__).parent
@@ -37,13 +32,18 @@ if not os.path.exists(temp_folder):
     os.makedirs(temp_folder)
     f"{temp_folder} created successfully"
 
-# Mount document URL
 # DOE base URL
-BASE_URL = "https://auniao.pb.gov.br/servicos/doe"
+BASE_URL = "https://auniao.pb.gov.br/doe"
+# DOE daily edition
+DAILY_DOE = f'diario-oficial-{current_date_text}.pdf'
 
 # Full DOE URL
-doe_url = f"{BASE_URL}/{current_year_text}/{current_month_text}/diario-oficial-{current_date_text}.pdf"
-
+full_url = utils.get_file_url(BASE_URL, DAILY_DOE)
+if full_url is not None:
+    doe_url = full_url
+else:
+    f"URL {full_url} NOT FOUND"
+    sys.exit()
 
 # Get DOE PDF
 # Input file path
@@ -63,7 +63,7 @@ list_of_files = utils.split_pdf(temp_folder, in_file_path)
 
 # Terms to search in converted file
 # search_term = [input("Enter a term you want to search in file: ")]
-search_terms = ["Term 1", "Term 2", "Term..."]
+search_terms = ["Term 1", "Term 2", "Term ..."]
 
 # Create dic to store terms
 term_search = {}
@@ -100,11 +100,13 @@ MSG_BODY = ""
 
 for k, v in result.items():
     if len(v) > 0:
-        MSG_BODY = MSG_BODY + f"* <b>{k.upper()}</b> <i>was found in pages</i> <b> {v} </b>\n"
+        MSG_BODY = MSG_BODY + \
+            f"* <b>{k.upper()}</b> <i>was found in pages</i> <b> {v} </b>\n"
 
 
 if MSG_BODY == "":
-    message = MSG_HEADER_L1 + "<b>The search terms were not found in today's DOE" + " edition.</b>"
+    message = MSG_HEADER_L1 + \
+        "<b>The search terms were not found in today's DOE" + " edition.</b>"
 else:
     message = MSG_HEADER_L1 + MSG_HEADER_L2 + MSG_BODY
 

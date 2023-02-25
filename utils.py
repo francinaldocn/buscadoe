@@ -10,6 +10,7 @@ from pdf2image import convert_from_path
 from PIL import Image
 from PyPDF2 import PdfFileReader
 from PyPDF2 import PdfFileWriter
+from bs4 import BeautifulSoup
 
 
 def is_valid_url(url: str) -> bool:
@@ -23,6 +24,34 @@ def is_valid_url(url: str) -> bool:
             boolean: True, if url exist. False if url doesn't exist
     """
     return requests.head(url).status_code == 200
+
+
+def get_file_url(url, substring):
+    """
+    Finds a full url that contains a specific substring.
+
+        Parameters:
+            url (str): URL to check
+            substring (str) : Substring to find
+
+        Return:
+            str: full_ulr, if it contains the substring. None, if not contain.
+    """
+    reqs = requests.get(url)
+    soup = BeautifulSoup(reqs.text, 'html.parser')
+    subs = substring
+    doe_url = None
+    for link in soup.find_all('a'):
+        full_url = str(link.get('href'))
+
+        try:
+            full_url.index(subs)
+        except ValueError:
+            pass
+        else:
+            doe_url = link.get('href')
+
+    return doe_url
 
 
 def get_file(url: str, in_file: str) -> str:
@@ -138,7 +167,8 @@ def convert_img_to_text(tmp_folder: str, img_file: str) -> str:
 
     """
     filename = f"{tmp_folder}/{img_file}.jpg"
-    text = str(((pytesseract.image_to_string(Image.open(filename), config="-l por --oem 3 --psm 3"))))
+    text = str(((pytesseract.image_to_string(
+        Image.open(filename), config="-l por --oem 3 --psm 3"))))
     text = text.replace("-\n", "")
     os.remove(f"{tmp_folder}/{img_file}.jpg")
 
