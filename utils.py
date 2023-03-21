@@ -26,32 +26,24 @@ def is_valid_url(url: str) -> bool:
     return requests.head(url).status_code == 200
 
 
-def get_file_url(url, substring):
+def get_file_url(url: str, substring: str) -> str:
     """
-    Finds a full url that contains a specific substring.
+    Find a full url that contains a specific substring.
 
-        Parameters:
-            url (str): URL to check
-            substring (str) : Substring to find
+    Args:
+        url (str): URL to check
+        substring (str): Substring to find
 
-        Return:
-            str: full_ulr, if it contains the substring. None, if not contain.
+    Returns:
+        str: full_url, if it contains the substring. None, if not contain.
     """
-    reqs = requests.get(url)
-    soup = BeautifulSoup(reqs.text, 'html.parser')
-    subs = substring
-    doe_url = None
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
     for link in soup.find_all('a'):
         full_url = str(link.get('href'))
-
-        try:
-            full_url.index(subs)
-        except ValueError:
-            pass
-        else:
-            doe_url = link.get('href')
-
-    return doe_url
+        if substring in full_url:
+            return full_url
+    return None
 
 
 def get_file(url: str, in_file: str) -> str:
@@ -73,7 +65,7 @@ def get_file(url: str, in_file: str) -> str:
     return in_file
 
 
-def verify_if_pdf_is_text_or_image(temp_folder: str, in_file: str) -> str:
+def verify_if_pdf_is_text_or_image(temp_folder: str, in_file: str) -> bool:
     """
     Verify if PDF is text or image.
 
